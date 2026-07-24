@@ -14,7 +14,7 @@ namespace App.Infrastructure.Repositories
             await _db.Operations
             .AddAsync(operation, ct);
 
-        public async Task<Operation?> GetWithLockAsync(string id, CancellationToken ct = default)
+        public async Task<Operation?> GetWithLockAsync(string operationId, CancellationToken ct = default)
         {
             return await _db.Operations
                 .FromSqlRaw(
@@ -22,13 +22,13 @@ namespace App.Infrastructure.Repositories
                 SELECT * FROM "Operations"
                 WHERE "OperationId" = {0} FOR UPDATE NOWAIT
                 """,
-                id)
+                operationId)
                 .SingleOrDefaultAsync(ct);
         }
 
-        public async Task<Operation?> GetAsNoTrackingAsync(string id, CancellationToken ct = default) =>
+        public async Task<Operation?> GetAsNoTrackingAsync(string operationId, CancellationToken ct = default) =>
             await _db.Operations
             .AsNoTracking()
-            .SingleOrDefaultAsync(o => o.OperationId == id, ct);
+            .SingleOrDefaultAsync(o => o.OperationId == operationId, ct);
     }
 }
