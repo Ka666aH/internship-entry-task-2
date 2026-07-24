@@ -16,8 +16,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Application\" />
-    <Folder Include="Infrastructure\Repositories\" />
     <Folder Include="Presentation\Controllers\" />
     <Folder Include="Presentation\" />
   </ItemGroup>

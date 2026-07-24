@@ -1,4 +1,6 @@
+using App.Application.Interfaces.Repositories;
 using App.Infrastructure.Database;
+using App.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -16,6 +18,10 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 {
     options.SerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.SnakeCaseUpper));
 });
+
+builder.Services.AddScoped<IOperationRepository, OperationRepository>();
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
 var app = builder.Build();
 
 app.MapControllers();

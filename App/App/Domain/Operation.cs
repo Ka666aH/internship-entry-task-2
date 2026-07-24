@@ -26,6 +26,8 @@ namespace App.Domain
                 throw new InvalidOperationException("ProviderPaymentId уже записан.");
             ProviderPaymentId = providerPaymentId;
         }
+#pragma warning disable CS8618 // Поле, не допускающее значения NULL, должно содержать значение, отличное от NULL, при выходе из конструктора. Рассмотрите возможность добавления модификатора "required" или объявления значения, допускающего значение NULL.
         private Operation() { }
+#pragma warning restore CS8618 // Поле, не допускающее значения NULL, должно содержать значение, отличное от NULL, при выходе из конструктора. Рассмотрите возможность добавления модификатора "required" или объявления значения, допускающего значение NULL.
     }
 }

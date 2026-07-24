@@ -2,10 +2,9 @@
 
 ## Проект
 
-Платёжный сервис (тестовое задание для стажировки). ASP.NET Core, .NET 10.  
-HTTP API с идемпотентностью, crash recovery, фоновой дожималкой и callback-квитанциями.
+Платёжный сервис (тестовое задание). ASP.NET Core, .NET 10, PostgreSQL 18 (EF Core / Npgsql).
 
-## Роуты (читать README.md — это контракт)
+## Роуты (контракт, менять нельзя)
 
 | Метод | Маршрут | Статус |
 |---|---|---|
@@ -16,54 +15,54 @@ HTTP API с идемпотентностью, crash recovery, фоновой д�
 | GET | `/operations/{id}` | 200 |
 | GET | `/operations/{id}/events` | 200 |
 
-Все остальные — на усмотрение. Маршруты выше менять нельзя — по ним идёт автопроверка.
-
-## Архитектура
-
-- `Program.cs` — `builder.Services.AddControllers()` (НЕ Minimal API). Папка `Controllers/` уже создана, нужно добавить контроллеры.
-- Обязательное хранилище — любое. SQLite проще всего (volume `/data`). EF Core или ADO.NET — без разницы.
-- Фоновая дожималка — `BackgroundService`, читает `PROCESSING` и повторяет отправку.
-- Provider — внешний HTTP (из `PROVIDER_URL`). Idempotency-Key = operationId.
-- Callback — source of truth. Только он переводит в финальный статус.
-- Транзакция submit: `UPDLOCK` / `UPDATE ... WHERE status='CREATED'`, HTTP-вызов снаружи транзакции.
-
 ## Команды
 
 ```bash
-# Сборка
 dotnet build App/App/App.csproj
-
-# Запуск с провайдером (из корня репо)
-docker compose up --build
+docker compose up --build    # полный запуск с PostgreSQL и провайдером
 ```
 
-Сервис слушает порт 8080. Provider-simulator на 8081.
+## Структура (факт из .csproj и кода)
 
-## Docker
+```
+App/App/
+  Domain/          — Operation, OperationStatus (enum, SnakeCaseUpper JSON)
+  Application/     — пусто, сюда сервисы
+  Infrastructure/
+    Database/      — AppDbContext (EF Core, operations table)
+    Repositories/  — OperationRepository (скелет)
+  Presentation/Controllers/ — пусто, сюда контроллеры
+  Program.cs       — AddControllers, ConfigureHttpJsonOptions, EnsureCreated
+```
 
-- Dockerfile: `App/App/Dockerfile` (multi-stage, net10.0).
-- `docker-compose.yml` (или `compose.yaml`) — в КОРНЕ репозитория.
-- Образ провайдера: `ghcr.io/fintech-dev-lab/internship-provider-simulator:v0.2.0` (публичный).
-- Volume: `candidate-data:/data`.
-- `PROVIDER_URL=http://provider-simulator:8081`
-- `CALLBACK_URL=http://candidate-service:8080/receipts`
+## Архитектурные решения (уже зафиксированы в коде)
 
-## Окружение
+- **PostgreSQL** через `UseNpgsql`. ConnectionString из `ConnectionStrings:PostgreSQL`.
+- `Program.cs:23-28` — `Database.EnsureCreated()` на старте (не миграции).
+- Enums сериализуются `SnakeCaseUpper` (`PROCESSING`, `COMPLETED`, `REJECTED`).
+- `Operation.SetProviderPaymentId()` кидает `InvalidOperationException` при повторной записи.
+- `docker-compose.yml` — 3 сервиса: `candidate-service` (build ./App/App), `db` (postgres:18), `provider-simulator` (ghcr).
+- `PROVIDER_URL=http://provider-simulator:8081`.
+- Callback: `POST /receipts`, приходит от провайдера на `http://candidate-service:8080/receipts`.
+- Submit транзакция: `UPDLOCK` / `UPDATE ... WHERE status='CREATED'`; HTTP вызов снаружи транзакции.
+- BackgroundService — дожималка (PROCESSING → retry отправки). Нужно реализовать.
 
-- `PROVIDER_URL` — обязателен, адрес провайдера.
-- Порт 8080 в контейнере (в launchSettings для Docker профиля `ASPNETCORE_HTTP_PORTS=8080`).
-- Решение: `App/App.slnx` (новый формат .slnx).
+## Что ещё нужно реализовать
 
-## Что ещё не сделано
+- Контроллеры в `Presentation/Controllers/`
+- Application-сервисы (создание, submit, обработка receipt, получение events)
+- `OperationRepository` — дописать методы
+- BackgroundService для фоновой отправки PROCESSING
+- Graceful shutdown (проверять `stoppingToken` между итерациями)
 
-- Нет ни одного контроллера, модели, миграции.
-- Нет compose.yaml в корне (нужен обязательно).
-- Нет тестов (dotnet test).
-- Выбор БД не зафиксирован.
-- Файлы `PLAN.md` и `README.old.md` в .gitignore — не коммитить.
+## Docker / окружение
 
-## Стиль
+- build context: `./App/App` (не корень репо)
+- PostgreSQL credentials: `postgres` / `postgres`, БД `operations` (volume `pgdata`)
+- `ASPNETCORE_HTTP_PORTS=8080` (из `docker-compose.override.yml`)
 
-- C#, nullable включён, implicit usings.
-- Сообщения, журналы, README — на русском (ТЗ на русском).
-- Код — на английском (переменные, классы, комментарии).
+## Другое
+
+- nullable включён, implicit usings.
+- README, журналы — на русском. Код — на английском.
+- `PLAN.md` и `README.old.md` в `.gitignore` — не коммитить.
