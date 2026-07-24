@@ -1,4 +1,6 @@
 using App.Application.Interfaces.Repositories;
+using App.Application.Interfaces.Services;
+using App.Application.Services;
 using App.Infrastructure.Database;
 using App.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -22,10 +24,14 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 builder.Services.AddScoped<IOperationRepository, OperationRepository>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
+builder.Services.AddScoped<IOperationService, OperationService>();
+builder.Services.AddScoped<IReceiptService, ReceiptService>();
+
+builder.Services.AddHealthChecks();
 var app = builder.Build();
 
 app.MapControllers();
-
+app.MapHealthChecks("/health");
 using (var scope = app.Services.CreateScope())
 {
     scope.ServiceProvider
