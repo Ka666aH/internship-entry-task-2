@@ -26,6 +26,6 @@ namespace App.Domain
                 throw new InvalidOperationException("ProviderPaymentId уже записан.");
             ProviderPaymentId = providerPaymentId;
         }
-
+        private Operation() { }
     }
 }
