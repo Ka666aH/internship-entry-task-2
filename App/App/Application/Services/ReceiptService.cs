@@ -10,11 +10,13 @@ namespace App.Application.Services
     public class ReceiptService : IReceiptService
     {
         private readonly IOperationRepository _operationRepository;
+        private readonly IOperationEventRepository _operationEventRepository;
         private readonly IUnitOfWork _unitOfWork;
 
-        public ReceiptService(IOperationRepository operationRepository, IUnitOfWork unitOfWork)
+        public ReceiptService(IOperationRepository operationRepository, IOperationEventRepository operationEventRepository, IUnitOfWork unitOfWork)
         {
             _operationRepository = operationRepository;
+            _operationEventRepository = operationEventRepository;
             _unitOfWork = unitOfWork;
         }
 
@@ -29,8 +31,16 @@ namespace App.Application.Services
 
             if (operation.ProviderPaymentId == null)
                 operation.SetProviderPaymentId(request.ProviderPaymentId);
-            if (request.Result == "COMPLETED") operation.Complete();
-            else operation.Reject();
+            if (request.Result == "COMPLETED")
+            {
+                operation.Complete();
+                await _operationEventRepository.CreateAsync(new(3, request.OperationId, OperationStatus.Processing, OperationStatus.Completed, "Operation completed"), ct);
+            }
+            else
+            {
+                operation.Reject();
+                await _operationEventRepository.CreateAsync(new(3, request.OperationId, OperationStatus.Processing, OperationStatus.Rejected, "Operation rejected"), ct);
+            }
             await _unitOfWork.SaveChangesAsync(ct);
 
             await tx.CommitAsync(ct);

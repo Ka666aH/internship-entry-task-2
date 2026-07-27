@@ -23,6 +23,7 @@ builder.Services.Configure<Microsoft.AspNetCore.Mvc.JsonOptions>(options =>
 });
 
 builder.Services.AddScoped<IOperationRepository, OperationRepository>();
+builder.Services.AddScoped<IOperationEventRepository, OperationEventRepository>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 builder.Services.AddScoped<IOperationService, OperationService>();

@@ -2,6 +2,7 @@
 using App.Application.Enums;
 using App.Application.Interfaces.Services;
 using App.Domain;
+using App.Presentation.Mappers;
 using Microsoft.AspNetCore.Mvc;
 
 namespace App.Presentation.Controllers
@@ -47,9 +48,10 @@ namespace App.Presentation.Controllers
             return Ok(operation);
         }
         [HttpGet("{id}/events")]
-        public Task<IActionResult> GetEvents([FromRoute] string id, CancellationToken ct)
+        public async Task<IActionResult> GetEvents([FromRoute] string id, CancellationToken ct)
         {
-            throw new NotImplementedException();
+            var operationEvents = await _operationService.GetOperationEventsListAsync(id, ct);
+            return Ok(operationEvents.ToDTO());
         }
     }
 }
