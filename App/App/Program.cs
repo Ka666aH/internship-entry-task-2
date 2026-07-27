@@ -16,9 +16,10 @@ builder.Services.AddControllers();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("PostgreSQL")));
 
-builder.Services.ConfigureHttpJsonOptions(options =>
+builder.Services.Configure<Microsoft.AspNetCore.Mvc.JsonOptions>(options =>
 {
-    options.SerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.SnakeCaseUpper));
+    options.JsonSerializerOptions.Converters.Add(
+        new JsonStringEnumConverter(JsonNamingPolicy.SnakeCaseUpper));
 });
 
 builder.Services.AddScoped<IOperationRepository, OperationRepository>();
