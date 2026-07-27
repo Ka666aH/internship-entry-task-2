@@ -23,7 +23,7 @@ namespace App.Domain
         public void SetProviderPaymentId(Guid providerPaymentId)
         {
             if (ProviderPaymentId is not null) 
-                throw new InvalidOperationException("ProviderPaymentId уже записан.");
+                throw new InvalidOperationException("ProviderPaymentId is already set.");
             ProviderPaymentId = providerPaymentId;
         }
 #pragma warning disable CS8618 // Поле, не допускающее значения NULL, должно содержать значение, отличное от NULL, при выходе из конструктора. Рассмотрите возможность добавления модификатора "required" или объявления значения, допускающего значение NULL.
