@@ -5,12 +5,12 @@ namespace App.Domain
     public class Operation
     {
         public string OperationId { get; init; }
-        public decimal Amount { get; init; }
+        public string Amount { get; init; }
         public string Currency { get; init; }
         public string? Description { get; init; }
         public OperationStatus Status { get; private set; } = OperationStatus.Created;
         public Guid? ProviderPaymentId { get; private set; } = null;
-        public Operation(string operationId ,decimal amount, string currency, string? description)
+        public Operation(string operationId ,string amount, string currency, string? description)
         {
             OperationId = operationId;
             Amount = amount;

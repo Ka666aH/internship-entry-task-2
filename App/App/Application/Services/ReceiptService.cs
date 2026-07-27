@@ -22,10 +22,11 @@ namespace App.Application.Services
             Operation? operation = await _operationRepository.GetWithLockAsync(request.OperationId, ct);
 
             if (operation == null) return ReceiptResult.NotFound;
-            if (operation.ProviderPaymentId != null && operation.ProviderPaymentId != request.ProviderPaymentId) return ReceiptResult.Conflict;
             if (operation.Status != OperationStatus.Processing) return ReceiptResult.Processed;
+            if (operation.ProviderPaymentId != null && operation.ProviderPaymentId != request.ProviderPaymentId) return ReceiptResult.Conflict;
 
-            operation.SetProviderPaymentId(request.ProviderPaymentId);
+            if (operation.ProviderPaymentId == null)
+                operation.SetProviderPaymentId(request.ProviderPaymentId);
             if (request.Result == "COMPLETED") operation.Complete();
             else operation.Reject();
             await _unitOfWork.SaveChangesAsync(ct);

@@ -60,8 +60,11 @@ namespace App.Application.Services
                         if (response.IsSuccessStatusCode)
                         {
                             var result = await response.Content.ReadFromJsonAsync<ProviderResponse>(cancellationToken: ct);
-                            await SavePaymentId(operationRepository, unitOfWork, op.OperationId, result!.ProviderPaymentId, ct);
-                            _backoff.TryRemove(op.OperationId, out _);
+                            if (result != null)
+                            {
+                                await SavePaymentId(operationRepository, unitOfWork, op.OperationId, result.ProviderPaymentId, ct);
+                                _backoff.TryRemove(op.OperationId, out _);
+                            }
                             return;
                         }
                     }
@@ -70,6 +73,7 @@ namespace App.Application.Services
                     var retryCount = state?.RetryCount ?? 0;
                     Backoff(op.OperationId, retryCount + 1);
                 });
+                await Task.Delay(1000, stoppingToken);
             }
         }
         private void Backoff(string operationId, int retryCount)

@@ -19,7 +19,9 @@ namespace App.Presentation.Controllers
         public async Task<IActionResult> Create([FromBody] OperationCreateRequest request, CancellationToken ct)
         {
             //validation
-            if (request.Amount <= 0 || request.Amount % 0.01m != 0) return BadRequest("Amount must be positive with ≤ 2 decimal places");
+            if (!decimal.TryParse(request.Amount, out decimal amount) ||
+                amount <= 0 || 
+                amount % 0.01m != 0) return BadRequest("Amount must be positive with ≤ 2 decimal places");
 
             Operation? operation = await _operationService.CreateAsync(request, ct);
             if (operation == null) return Conflict();
