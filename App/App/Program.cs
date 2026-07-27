@@ -27,6 +27,15 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IOperationService, OperationService>();
 builder.Services.AddScoped<IReceiptService, ReceiptService>();
 
+builder.Services.AddHttpClient("Provider", client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["PROVIDER_URL"]
+        ?? throw new InvalidOperationException("PROVIDER_URL is not set"));
+    client.Timeout = TimeSpan.FromSeconds(10);
+});
+
+builder.Services.AddHostedService<OperationOutboxWorker>();
+
 builder.Services.AddHealthChecks();
 var app = builder.Build();
 

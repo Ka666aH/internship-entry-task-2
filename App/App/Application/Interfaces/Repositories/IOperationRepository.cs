@@ -1,4 +1,5 @@
 ﻿using App.Domain;
+using App.Domain.Enums;
 
 namespace App.Application.Interfaces.Repositories
 {
@@ -7,5 +8,6 @@ namespace App.Application.Interfaces.Repositories
         Task CreateAsync(Operation operation, CancellationToken ct = default);
         Task<Operation?> GetWithLockAsync(string operationId, CancellationToken ct = default);
         Task<Operation?> GetAsNoTrackingAsync(string operationId, CancellationToken ct = default);
+        Task<List<Operation>> GetByStatusAsync(OperationStatus status, CancellationToken ct = default);
     }
 }
