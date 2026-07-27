@@ -1,4 +1,6 @@
-﻿using App.Application.Interfaces.Repositories;
+﻿using App.Application.DTO;
+using App.Application.Enums;
+using App.Application.Interfaces.Repositories;
 using App.Application.Interfaces.Services;
 using App.Domain;
 using App.Domain.Enums;

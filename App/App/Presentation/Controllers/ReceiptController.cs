@@ -1,4 +1,5 @@
-﻿using App.Application;
+﻿using App.Application.DTO;
+using App.Application.Enums;
 using App.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc;
 

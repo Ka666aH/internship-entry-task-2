@@ -1,4 +1,6 @@
-﻿using App.Domain;
+﻿using App.Application.DTO;
+using App.Application.Enums;
+using App.Domain;
 
 namespace App.Application.Interfaces.Services
 {

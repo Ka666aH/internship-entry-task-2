@@ -1,4 +1,4 @@
-﻿namespace App.Application
+﻿namespace App.Application.Enums
 {
     public enum SubmitResult
     {
